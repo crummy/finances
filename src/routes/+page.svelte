@@ -1,7 +1,8 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import Transactions from '@components/Transactions.svelte';
-	import { AppBar, LightSwitch, RadioGroup, RadioItem } from '@skeletonlabs/skeleton';
+	import { AppBar, LightSwitch } from '@skeletonlabs/skeleton';
+	import { popup } from '@skeletonlabs/skeleton';
 
 	export let data: PageData;
 	let selectedAccount = data.accounts[0];
@@ -23,11 +24,15 @@
 			<LightSwitch />
 			<button
 				class="bg-surface-400-500-token h-full p-2 m-0 rounded-tr-container-token"
-				popovertarget="account-selection"
+				use:popup={{
+					event: 'click',
+					target: 'account-selection',
+					placement: 'bottom'
+				}}
 			>
 				{selectedAccount.name} ▼
 			</button>
-			<div popover id="account-selection" class="btn-group-vertical variant-filled">
+			<div data-popup="account-selection" class="btn-group-vertical variant-filled">
 				{#each data.accounts as account}
 					<button onclick={() => (selectedAccount = account)} name="account" value={account}>
 						{account.name}
