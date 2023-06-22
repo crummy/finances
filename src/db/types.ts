@@ -11,7 +11,7 @@ interface TransactionTable {
 }
 
 export interface Database {
-	transaction: TransactionTable;
+	transactions: TransactionTable;
 }
 
 export type Transaction = Selectable<TransactionTable>;

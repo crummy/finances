@@ -1,11 +1,12 @@
 import { loadAccounts, loadTransactions } from '../akahu/akahu';
 import type { PageServerLoad } from './$types';
-import type { Account, Paginated, Transaction, TransactionQueryParams } from 'akahu';
+import type { Account, Transaction, TransactionQueryParams } from 'akahu';
 import { subDays } from 'date-fns';
 import { db } from '../db/db.server';
+import type { Transaction as DbTransaction } from '../db/types';
 
 type Params = {
-	transactions: Paginated<Transaction>;
+	transactions: DbTransaction[];
 	accounts: Account[];
 };
 
@@ -22,7 +23,7 @@ async function loadLatest() {
 		const page = await loadTransactions(query);
 		// Store the returned transaction `items` from each page
 		const existingTransactions = await db
-			.selectFrom('transaction')
+			.selectFrom('transactions')
 			.where(
 				'akahuId',
 				'in',
@@ -41,7 +42,7 @@ async function loadLatest() {
 					continue;
 				}
 				await db
-					.insertInto('transaction')
+					.insertInto('transactions')
 					.values({
 						akahuId: transaction._id,
 						date: transaction.date,
@@ -63,8 +64,14 @@ async function loadLatest() {
 
 export const load: PageServerLoad<Params> = async () => {
 	await loadLatest();
+	const transactions: DbTransaction[] = await db
+		.selectFrom('transactions')
+		.orderBy('date', 'desc')
+		.selectAll()
+		.execute();
+	const accounts = await loadAccounts();
 	return {
-		transactions: await db.selectFrom('transaction').orderBy('date', 'desc').selectAll().execute(),
-		accounts: await loadAccounts()
+		transactions,
+		accounts
 	};
 };
