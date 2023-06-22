@@ -1,11 +1,10 @@
 <script lang="ts">
 	import Chart from 'svelte-frappe-charts';
-	import type { Transaction } from 'akahu';
 	import { startOfMonth, startOfWeek, startOfDay, addDays } from 'date-fns';
 	import { distinct } from '$lib/util';
+	import type { Transaction } from '../db/types';
 
 	export let transactions: Transaction[];
-	export let categories: string[];
 	let group: 'month' | 'week' | 'day' = 'month';
 	const earliest = Math.min(...transactions.map((t) => new Date(t.date).valueOf()));
 	const latest = Math.max(...transactions.map((t) => new Date(t.date).valueOf()));
@@ -39,9 +38,9 @@
 			const month = startOfMonth(date).toLocaleDateString();
 			const week = startOfWeek(date).toLocaleDateString();
 			const day = startOfDay(date).toLocaleDateString();
-			monthAmounts[month] = monthAmounts[month] + transaction.amount;
-			weekAmounts[week] = weekAmounts[week] + transaction.amount;
-			dayAmounts[day] = dayAmounts[day] + transaction.amount;
+			monthAmounts[month] = monthAmounts[month] + transaction.amountCents;
+			weekAmounts[week] = weekAmounts[week] + transaction.amountCents;
+			dayAmounts[day] = dayAmounts[day] + transaction.amountCents;
 		}
 		monthAmounts = monthAmounts;
 		weekAmounts = weekAmounts;

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Transaction } from 'akahu';
+	import type { Transaction } from '../db/types';
 
 	export let transactions: Transaction[];
 </script>
@@ -10,19 +10,22 @@
 			<th>Transaction</th>
 			<th>Amount</th>
 			<th>Date</th>
-			<th>Category</th>
+			<th>Type</th>
 		</tr>
 	</thead>
 	<tbody>
 		{#each transactions as transaction}
 			<tr>
-				<td> {transaction.description}</td><td>{transaction.amount}</td><td
-					>{new Date(transaction.date).toLocaleDateString()}</td
-				>
 				<td>
+					<div>{transaction.description}</div>
 					{#if transaction.category}
-						<span class="chip">{transaction.category.name}</span>
+						<span class="opacity-50 text-sm">{transaction.category}</span>
 					{/if}
+				</td>
+				<td>{transaction.amountCents / 100}</td>
+				<td>{new Date(transaction.date).toLocaleDateString()}</td>
+				<td>
+					<span class="chip">{transaction.type}</span>
 				</td>
 			</tr>
 		{/each}

@@ -10,7 +10,7 @@
 	let filteredTransactions: Transaction[] = [];
 	$: filteredTransactions = transactions.filter((t) => {
 		const description = t.description.toLowerCase();
-		const category = t.category?.toLowerCase();
+		const category = t.category?.toLowerCase() ?? '';
 		const query = search.toLowerCase();
 		return description.includes(query) || category.includes(query);
 	});
