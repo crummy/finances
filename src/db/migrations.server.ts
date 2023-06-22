@@ -1,19 +1,15 @@
-import * as path from 'path';
-import { promises as fs } from 'fs';
-import { Migrator, FileMigrationProvider } from 'kysely';
+import { Migrator } from 'kysely';
 import { db } from './db.server';
-import { fileURLToPath } from 'url';
+import * as migration1 from './migrations/2023-06-22-initial';
 
 export async function runMigrations() {
-	const __filename = fileURLToPath(import.meta.url);
-	const __dirname = path.dirname(__filename);
 	const migrator = new Migrator({
 		db,
-		provider: new FileMigrationProvider({
-			fs,
-			path,
-			migrationFolder: path.join(__dirname, 'migrations')
-		})
+		provider: {
+			getMigrations() {
+				return Promise.resolve({ '2023-06-22-initial': migration1 });
+			}
+		}
 	});
 
 	const { error, results } = await migrator.migrateToLatest();
@@ -31,6 +27,4 @@ export async function runMigrations() {
 		console.error(error);
 		process.exit(1);
 	}
-
-	await db.destroy();
 }
