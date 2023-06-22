@@ -1,4 +1,6 @@
 <script lang="ts">
+	export const ssr = false;
+
 	import type { PageData } from './$types';
 	import Transactions from '@components/Transactions.svelte';
 	import { AppBar, LightSwitch } from '@skeletonlabs/skeleton';
