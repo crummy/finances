@@ -1,11 +1,16 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import Transactions from '@components/Transactions.svelte';
 	import { AppBar, LightSwitch } from '@skeletonlabs/skeleton';
 	import { popup } from '@skeletonlabs/skeleton';
+	import Chart from '@components/Chart.svelte';
+	import TransactionsList from '@components/TransactionsList.svelte';
+	import Filter from '@components/Filter.svelte';
+	import type { Transaction } from '../db/types';
 
 	export let data: PageData;
 	let selectedAccount = data.accounts[0];
+
+	let filteredTransactions: Transaction[] = data.transactions;
 </script>
 
 <main
@@ -41,7 +46,10 @@
 			</div>
 		</svelte:fragment>
 	</AppBar>
-	<div class="p-8">
-		<Transactions transactions={data.transactions} />
-	</div>
+
+	<Filter transactions={data.transactions} bind:filteredTransactions class="p-4" />
+
+	<Chart transactions={filteredTransactions} />
+
+	<TransactionsList transactions={filteredTransactions} />
 </main>

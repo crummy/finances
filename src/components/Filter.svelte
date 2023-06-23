@@ -1,6 +1,4 @@
 <script lang="ts">
-	import Chart from '@components/Chart.svelte';
-	import TransactionsList from '@components/TransactionsList.svelte';
 	import type { Transaction } from '../db/types';
 	import { distinct } from '$lib/util';
 	import InlineAutocomplete from '@components/InlineAutocomplete.svelte';
@@ -26,7 +24,7 @@
 		'expenses'
 	];
 
-	let filteredTransactions: Transaction[];
+	export let filteredTransactions: Transaction[];
 	$: filteredTransactions = transactions.filter((t) => {
 		if (filterInputs.length == 0) return true;
 		return filters.some((f) => f(t));
@@ -66,8 +64,8 @@
 	});
 </script>
 
-<InlineAutocomplete options={autocompleteOptions} bind:selected={filterInputs} />
-
-<Chart {categories} transactions={filteredTransactions} />
-
-<TransactionsList transactions={filteredTransactions} />
+<InlineAutocomplete
+	class={$$restProps.class}
+	options={autocompleteOptions}
+	bind:selected={filterInputs}
+/>

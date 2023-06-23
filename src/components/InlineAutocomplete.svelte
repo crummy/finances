@@ -7,10 +7,18 @@
 	let input = '';
 
 	let autocomplete: string;
-	$: autocomplete =
-		input.length > 0
-			? options.find((f) => f.toLowerCase().startsWith(input.toLowerCase())) ?? ''
-			: '';
+	$: {
+		if (input.trim().length == 0) {
+			autocomplete = '';
+		} else {
+			const match = options.find((f) => f.toLowerCase().startsWith(input.toLowerCase()));
+			if (match) {
+				autocomplete = input + match.substring(input.length);
+			} else {
+				autocomplete = '';
+			}
+		}
+	}
 
 	function listenForTab(e: KeyboardEvent) {
 		if (e.key === 'Enter' && autocomplete != '') {
@@ -22,10 +30,16 @@
 			e.preventDefault();
 		}
 	}
+
+	$: {
+		console.log(autocomplete);
+	}
 </script>
 
-<div class="flex flex-wrap gap-2 relative">
-	<div class="p-2 absolute pointer-events-none bg-transparent z-20">{autocomplete}</div>
+<div class={`flex flex-wrap relative ${$$restProps.class}`}>
+	<div class="p-2 absolute pointer-events-none bg-transparent z-10 text-secondary-400-500-token">
+		{autocomplete}
+	</div>
 	<InputChip
 		on:keydown={listenForTab}
 		bind:input
