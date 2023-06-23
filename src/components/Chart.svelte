@@ -53,7 +53,7 @@
 		group === 'month' ? monthAmounts : group === 'week' ? weekAmounts : dayAmounts
 	)
 		.sort((a, b) => a[0].localeCompare(b[0]))
-		.map(([, amount]) => amount);
+		.map(([, amount]) => amount / 100);
 </script>
 
 <div class:hidden={transactions.length === 0}>

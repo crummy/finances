@@ -13,7 +13,7 @@ type Params = {
 async function loadLatest() {
 	const now = new Date();
 	const query: TransactionQueryParams = {
-		start: subDays(now, 365).toISOString(),
+		start: subDays(now, 365 * 2).toISOString(), // akahu supports querying up to 2 years of transactions
 		end: now.toISOString()
 	};
 
@@ -37,10 +37,8 @@ async function loadLatest() {
 			return;
 		} else {
 			const existingAkahuIds = existingTransactions.map((t) => t.akahuId);
-			for (const transaction of transactions) {
-				if (existingAkahuIds.includes(transaction._id)) {
-					continue;
-				}
+			const newTransactions = page.items.filter((t) => !existingAkahuIds.includes(t._id));
+			for (const transaction of newTransactions) {
 				await db
 					.insertInto('transactions')
 					.values({
@@ -53,6 +51,7 @@ async function loadLatest() {
 					})
 					.execute();
 			}
+			console.log('Added ' + newTransactions.length + ' new transactions');
 		}
 
 		transactions.push(...page.items);
