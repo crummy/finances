@@ -4,30 +4,23 @@
 	export let transactions: Transaction[];
 </script>
 
-<table class="table">
-	<thead>
-		<tr>
-			<th>Transaction</th>
-			<th>Amount</th>
-			<th>Date</th>
-			<th>Type</th>
-		</tr>
-	</thead>
-	<tbody>
-		{#each transactions as transaction}
-			<tr>
-				<td>
-					<div>{transaction.description}</div>
-					{#if transaction.category}
-						<span class="opacity-50 text-sm">{transaction.category}</span>
-					{/if}
-				</td>
-				<td>{transaction.amountCents / 100}</td>
-				<td>{new Date(transaction.date).toLocaleDateString()}</td>
-				<td>
-					<span class="chip">{transaction.type}</span>
-				</td>
-			</tr>
-		{/each}
-	</tbody>
-</table>
+<section>
+	{#each transactions as transaction, i}
+		<div
+			class={'grid grid-cols-[5fr_1fr_1fr] p-2 ' +
+				(i % 2 === 0 ? 'bg-surface-300-600-token' : 'bg-surface-400-500-token')}
+		>
+			<span>
+				<span class="font-bold block"
+					>{transaction.description} <span class="chip">{transaction.type}</span>
+				</span>
+				{#if transaction.category}
+					<span class="opacity-50 text-sm">{transaction.category}</span>
+				{/if}
+			</span>
+			<span>{new Date(transaction.date).toLocaleDateString()}</span>
+
+			<span>{transaction.amountCents / 100}</span>
+		</div>
+	{/each}
+</section>
