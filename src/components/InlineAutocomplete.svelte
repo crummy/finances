@@ -31,10 +31,6 @@
 			e.preventDefault();
 		}
 	}
-
-	$: {
-		console.log(autocomplete);
-	}
 </script>
 
 <div class={`flex flex-wrap relative ${$$restProps.class}`}>

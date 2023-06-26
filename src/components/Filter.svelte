@@ -8,15 +8,9 @@
 	const categories: string[] = transactions
 		.map((transaction) => transaction.category)
 		.filter((category) => category != null)
-		.filter(distinct);
+		.filter(distinct) as string[];
 	const categoryFilter = (category: string) => (t: TransactionAndAccount) => {
-		if (t.category === null) {
-			return false;
-		}
-		const [command, label] = t.category.split(':');
-		return (
-			(command == 'c' || command == 'category') && label?.toLowerCase() == category.toLowerCase()
-		);
+		return t.category?.toLowerCase() == category.toLowerCase();
 	};
 	const categoryShortOptions = Object.fromEntries(
 		categories.map((c) => [`c:${c}`, categoryFilter])
@@ -27,8 +21,7 @@
 
 	const types: string[] = transactions.map((transaction) => transaction.type).filter(distinct);
 	const typeFilter = (type: string) => (t: TransactionAndAccount) => {
-		const [command, label] = t.type.split(':');
-		return (command == 't' || command == 'type') && label?.toLowerCase() == type.toLowerCase();
+		return t.type?.toLowerCase() == type.toLowerCase();
 	};
 	const typeShortOptions = Object.fromEntries(types.map((t) => [`t:${t}`, typeFilter(t)]));
 	const typeOptions = Object.fromEntries(types.map((t) => [`type:${t}`, typeFilter(t)]));
@@ -73,6 +66,10 @@
 	});
 
 	let filterInputs: string[] = [];
+
+	$: {
+		console.log(filterInputs);
+	}
 </script>
 
 <InlineAutocomplete
