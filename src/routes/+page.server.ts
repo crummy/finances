@@ -1,23 +1,30 @@
 import { loadAccounts, loadTransactions } from '../akahu/akahu';
 import type { PageServerLoad } from './$types';
-import type { Account, Transaction, TransactionQueryParams } from 'akahu';
+import type { TransactionQueryParams } from 'akahu';
 import { subDays } from 'date-fns';
 import { db } from '../db/db.server';
-import type { Transaction as DbTransaction } from '../db/types';
+
+export interface TransactionAndAccount {
+	akahuId: string;
+	description: string;
+	type: string;
+	category: string | null;
+	date: string;
+	amountCents: number;
+	accountName: string;
+}
 
 type Params = {
-	transactions: DbTransaction[];
-	accounts: Account[];
+	transactions: TransactionAndAccount[];
 };
 
-async function loadLatest() {
+async function loadLatestTransactions() {
 	const now = new Date();
 	const query: TransactionQueryParams = {
 		start: subDays(now, 365 * 2).toISOString(), // akahu supports querying up to 2 years of transactions
 		end: now.toISOString()
 	};
 
-	const transactions: Transaction[] = [];
 	do {
 		// Transactions are returned one page at a time
 		const page = await loadTransactions(query);
@@ -47,30 +54,70 @@ async function loadLatest() {
 						description: transaction.description,
 						type: transaction.type,
 						category: 'category' in transaction ? transaction.category.name : null,
-						amountCents: Math.round(transaction.amount * 100)
+						amountCents: Math.round(transaction.amount * 100),
+						akahuAccountId: transaction._account
 					})
 					.execute();
 			}
 			console.log('Added ' + newTransactions.length + ' new transactions');
 		}
 
-		transactions.push(...page.items);
 		// Update the cursor to point to the next page
 		query.cursor = page.cursor.next;
 		// Continue until the server returns a null cursor
 	} while (query.cursor !== null);
 }
 
-export const load: PageServerLoad<Params> = async () => {
-	await loadLatest();
-	const transactions: DbTransaction[] = await db
-		.selectFrom('transactions')
-		.orderBy('date', 'desc')
-		.selectAll()
-		.execute();
+async function loadLatestAccounts() {
 	const accounts = await loadAccounts();
+	for (const account of accounts) {
+		const exists =
+			(await db.selectFrom('accounts').select('id').where('akahuId', '=', account._id).execute())
+				.length > 0;
+		if (exists) {
+			await db
+				.updateTable('accounts')
+				.set({
+					name: account.name,
+					accountNumber: account.formatted_account,
+					type: account.type,
+					active: account.status == 'ACTIVE' ? 1 : 0
+				})
+				.where('akahuId', '=', account._id)
+				.execute();
+		} else {
+			await db
+				.insertInto('accounts')
+				.values({
+					akahuId: account._id,
+					name: account.name,
+					accountNumber: account.formatted_account,
+					type: account.type,
+					active: account.status == 'ACTIVE' ? 1 : 0
+				})
+				.execute();
+		}
+	}
+}
+
+export const load: PageServerLoad<Params> = async () => {
+	await loadLatestAccounts();
+	await loadLatestTransactions();
+	const transactions: TransactionAndAccount[] = await db
+		.selectFrom('transactions')
+		.innerJoin('accounts', 'transactions.akahuAccountId', 'accounts.akahuId')
+		.orderBy('date', 'desc')
+		.select([
+			'transactions.akahuId',
+			'description',
+			'transactions.type',
+			'category',
+			'date',
+			'amountCents',
+			'accounts.name as accountName'
+		])
+		.execute();
 	return {
-		transactions,
-		accounts
+		transactions
 	};
 };

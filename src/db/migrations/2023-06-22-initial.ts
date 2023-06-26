@@ -11,6 +11,7 @@ export async function up(db: Kysely<any>): Promise<void> {
 		.addColumn('amount_cents', 'integer', (col) => col.notNull())
 		.addColumn('date', 'text', (col) => col.notNull())
 		.addColumn('category', 'text')
+		.addColumn('akahu_account_id', 'text', (col) => col.references('accounts.akahu_id').notNull())
 		.execute();
 
 	await db.schema
@@ -18,7 +19,7 @@ export async function up(db: Kysely<any>): Promise<void> {
 		.addColumn('id', 'serial', (col) => col.primaryKey())
 		.addColumn('akahu_id', 'text', (col) => col.unique())
 		.addColumn('name', 'text', (col) => col.notNull())
-		.addColumn('active', 'boolean', (col) => col.notNull())
+		.addColumn('active', 'numeric', (col) => col.notNull())
 		.addColumn('account_number', 'text', (col) => col.notNull())
 		.addColumn('type', 'text', (col) => col.notNull())
 		.execute();

@@ -1,26 +1,16 @@
 <script lang="ts">
 	import type { PageData } from './$types';
 	import { AppBar, LightSwitch } from '@skeletonlabs/skeleton';
-	import { popup } from '@skeletonlabs/skeleton';
 	import Chart from '@components/Chart.svelte';
 	import TransactionsList from '@components/TransactionsList.svelte';
 	import Filter from '@components/Filter.svelte';
-	import type { Transaction } from '../db/types';
 	import Arrow from '@components/Arrow.svelte';
 	import { fly } from 'svelte/transition';
+	import type { TransactionAndAccount } from './+page.server';
 
 	export let data: PageData;
-	let selectedAccount = data.accounts[0];
 
-	let filteredTransactions: Transaction[] = data.transactions;
-
-	function grow(node, { delay = 0, duration = 1000 }) {
-		return {
-			delay,
-			duration,
-			css: (t, u) => `top: ${u}px`
-		};
-	}
+	let filteredTransactions: TransactionAndAccount[] = data.transactions;
 
 	let showTransactions = false;
 </script>
@@ -30,32 +20,12 @@
 >
 	<AppBar
 		class="flex bg-surface-300-600-token rounded-tl-container-token rounded-tr-container-token"
-		padding="p-0"
-		slotLead="p-4"
-		slotDefault="p-4"
 		slotTrail="h-full relative"
 	>
 		<svelte:fragment slot="lead">$</svelte:fragment>
 		<h1 class="text-2xl">Finances</h1>
 		<svelte:fragment slot="trail">
 			<LightSwitch />
-			<button
-				class="bg-surface-400-500-token h-full p-2 m-0 rounded-tr-container-token"
-				use:popup={{
-					event: 'click',
-					target: 'account-selection',
-					placement: 'bottom'
-				}}
-			>
-				{selectedAccount.name} ▼
-			</button>
-			<div data-popup="account-selection" class="btn-group-vertical variant-filled">
-				{#each data.accounts as account}
-					<button onclick={() => (selectedAccount = account)} name="account" value={account}>
-						{account.name}
-					</button>
-				{/each}
-			</div>
 		</svelte:fragment>
 	</AppBar>
 

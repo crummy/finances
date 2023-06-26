@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { Transaction } from '../db/types';
+	import type { TransactionAndAccount } from '../routes/+page.server';
 
-	export let transactions: Transaction[];
+	export let transactions: TransactionAndAccount[];
 </script>
 
 <section>

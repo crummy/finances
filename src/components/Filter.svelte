@@ -1,71 +1,83 @@
 <script lang="ts">
-	import type { Transaction } from '../db/types';
 	import { distinct } from '$lib/util';
 	import InlineAutocomplete from '@components/InlineAutocomplete.svelte';
+	import type { TransactionAndAccount } from '../routes/+page.server';
 
-	export let transactions: Transaction[];
+	export let transactions: TransactionAndAccount[];
 
 	const categories: string[] = transactions
 		.map((transaction) => transaction.category)
 		.filter((category) => category != null)
 		.filter(distinct);
+	const categoryFilter = (category: string) => (t: TransactionAndAccount) => {
+		if (t.category === null) {
+			return false;
+		}
+		const [command, label] = t.category.split(':');
+		return (
+			(command == 'c' || command == 'category') && label?.toLowerCase() == category.toLowerCase()
+		);
+	};
+	const categoryShortOptions = Object.fromEntries(
+		categories.map((c) => [`c:${c}`, categoryFilter])
+	);
+	const categoryOptions = Object.fromEntries(
+		categories.map((c) => [`category:${c}`, categoryFilter(c)])
+	);
+
 	const types: string[] = transactions.map((transaction) => transaction.type).filter(distinct);
+	const typeFilter = (type: string) => (t: TransactionAndAccount) => {
+		const [command, label] = t.type.split(':');
+		return (command == 't' || command == 'type') && label?.toLowerCase() == type.toLowerCase();
+	};
+	const typeShortOptions = Object.fromEntries(types.map((t) => [`t:${t}`, typeFilter(t)]));
+	const typeOptions = Object.fromEntries(types.map((t) => [`type:${t}`, typeFilter(t)]));
+
 	const descriptions: string[] = transactions
 		.map((transaction) => transaction.description)
 		.filter(distinct);
-	const autocompleteOptions = [
-		...categories.map((c) => `c:${c}`),
-		...categories.map((c) => `category:${c}`),
-		...types.map((t) => `t:${t}`),
-		...types.map((t) => `type:${t}`),
-		...descriptions.map((d) => `d:${d}`),
-		...descriptions.map((d) => `description:${d}`),
+	const descriptionFilter = (description: string) => (t: TransactionAndAccount) => {
+		return t.description.toLowerCase().includes(description.toLowerCase());
+	};
+
+	const accounts = transactions.map((t) => t.accountName).filter(distinct);
+
+	const autocompleteOptions: string[] = [
+		...Object.keys(categoryShortOptions),
+		...Object.keys(categoryOptions),
+		...Object.keys(typeShortOptions),
+		...Object.keys(typeOptions),
+		...descriptions,
 		'income',
 		'expenses'
 	];
 
-	export let filteredTransactions: Transaction[];
+	type Filter = (t: TransactionAndAccount) => boolean;
+	const filters: Record<string, Filter> = {
+		...categoryShortOptions,
+		...categoryOptions,
+		...typeShortOptions,
+		...typeOptions,
+		income: (t: TransactionAndAccount) => t.amountCents > 0,
+		expenses: (t: TransactionAndAccount) => t.amountCents < 0
+	};
+
+	export let filteredTransactions: TransactionAndAccount[];
 	$: filteredTransactions = transactions.filter((t) => {
 		if (filterInputs.length == 0) return true;
-		return filters.some((f) => f(t));
+		return filterInputs
+			.map(
+				(input) => (t: TransactionAndAccount) => filters[input]?.(t) ?? descriptionFilter(input)(t)
+			)
+			.every((f) => f(t));
 	});
-
-	type Filter = (t: Transaction) => boolean;
 
 	let filterInputs: string[] = [];
-	let filters: Filter[];
-	$: filters = filterInputs.map((input) => {
-		const f = input.toLowerCase();
-		console.log(f);
-		if (f == 'income') {
-			return (t: Transaction) => t.amountCents > 0;
-		} else if (f == 'expenses') {
-			return (t: Transaction) => t.amountCents < 0;
-		}
-		if (!f.includes(':')) {
-			return (t: Transaction) =>
-				t.description.toLowerCase().includes(f) ||
-				t.category?.toLowerCase().includes(f) ||
-				t.type.toLowerCase().includes(f);
-		}
-		const [command, label] = f.split(':');
-		switch (command) {
-			case 'type':
-			case 't':
-				return (t: Transaction) => t.type.toLowerCase() == label;
-			case 'category':
-			case 'c':
-				return (t: Transaction) => t.category?.toLowerCase() == label;
-			case 'description':
-			case 'd':
-				return (t: Transaction) =>
-					t.description.toLowerCase().includes(label) || t.category?.toLowerCase().includes(label);
-		}
-	});
 </script>
 
 <InlineAutocomplete
 	class={$$restProps.class}
 	options={autocompleteOptions}
+	permaOptions={accounts}
 	bind:selected={filterInputs}
 />

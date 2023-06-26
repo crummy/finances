@@ -2,9 +2,8 @@
 	import Chart from 'svelte-frappe-charts';
 	import { startOfMonth, startOfWeek, startOfDay, addDays } from 'date-fns';
 	import { distinct } from '$lib/util';
-	import type { Transaction } from '../db/types';
 
-	export let transactions: Transaction[];
+	export let transactions: TransactionAndAccount[];
 	let group: 'month' | 'week' | 'day' = 'month';
 	const earliest = Math.min(...transactions.map((t) => new Date(t.date).valueOf()));
 	const latest = Math.max(...transactions.map((t) => new Date(t.date).valueOf()));

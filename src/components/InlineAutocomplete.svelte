@@ -3,6 +3,7 @@
 
 	export let options: string[];
 	export let selected: string[];
+	export let permaOptions: string[];
 
 	let input = '';
 
