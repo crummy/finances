@@ -2,8 +2,10 @@
 	import InputChip from '@components/InputChip.svelte';
 
 	export let options: string[];
-	export let selected: string[];
 	export let permaOptions: string[];
+	export let selected: string[];
+	export let permaSelected: string[];
+	const allOptions = [...permaOptions, ...options];
 
 	let input = '';
 
@@ -12,7 +14,7 @@
 		if (input.trim().length == 0) {
 			autocomplete = '';
 		} else {
-			const match = options.find((f) => f.toLowerCase().startsWith(input.toLowerCase()));
+			const match = allOptions.find((f) => f.toLowerCase().startsWith(input.toLowerCase()));
 			if (match) {
 				autocomplete = input + match.substring(input.length);
 			} else {
@@ -21,7 +23,7 @@
 		}
 	}
 
-	function listenForTab(e: KeyboardEvent) {
+	function listenForEnter(e: KeyboardEvent) {
 		if (e.key === 'Enter' && autocomplete != '') {
 			selected = [...selected, autocomplete];
 			input = '';
@@ -38,9 +40,10 @@
 		{autocomplete}
 	</div>
 	<InputChip
-		on:keydown={listenForTab}
+		on:keydown={listenForEnter}
 		bind:input
 		bind:value={selected}
+		bind:permaValue={permaOptions}
 		name="chips"
 		placeholder="category:supermarkets, type:eftpos, expenses..."
 	/>

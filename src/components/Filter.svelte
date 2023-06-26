@@ -34,6 +34,12 @@
 	};
 
 	const accounts = transactions.map((t) => t.accountName).filter(distinct);
+	const accountFilter = (account: string) => (t: TransactionAndAccount) => {
+		return t.accountName.toLowerCase() == account.toLowerCase();
+	};
+	const accountOptions = Object.fromEntries(
+		accounts.map((a) => [`account:${a}`, accountFilter(a)])
+	);
 
 	const autocompleteOptions: string[] = [
 		...Object.keys(categoryShortOptions),
@@ -58,23 +64,30 @@
 	export let filteredTransactions: TransactionAndAccount[];
 	$: filteredTransactions = transactions.filter((t) => {
 		if (filterInputs.length == 0) return true;
-		return filterInputs
-			.map(
-				(input) => (t: TransactionAndAccount) => filters[input]?.(t) ?? descriptionFilter(input)(t)
-			)
-			.every((f) => f(t));
+		const matchesFilters =
+			filterInputs.length == 0 ||
+			filterInputs
+				.map(
+					(input) => (t: TransactionAndAccount) =>
+						filters[input]?.(t) ?? descriptionFilter(input)(t)
+				)
+				.every((f) => f(t));
+		const matchesPermaFilters =
+			permaFilterInputs.length == 0 ||
+			permaFilterInputs
+				.map((input) => (t: TransactionAndAccount) => accountOptions[input]?.(t))
+				.some((f) => f(t));
+		return matchesFilters && matchesPermaFilters;
 	});
 
 	let filterInputs: string[] = [];
-
-	$: {
-		console.log(filterInputs);
-	}
+	let permaFilterInputs: string[] = [];
 </script>
 
 <InlineAutocomplete
 	class={$$restProps.class}
 	options={autocompleteOptions}
-	permaOptions={accounts}
+	permaOptions={Object.keys(accountOptions)}
 	bind:selected={filterInputs}
+	bind:permaSelected={permaFilterInputs}
 />

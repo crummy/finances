@@ -21,7 +21,9 @@
 	 */
 	export let name: string;
 	/** An array of values. */
-	export let value: any[] = [];
+	export let value: string[] = [];
+
+	export let permaValue: string[] = [];
 	/**
 	 * Provide a whitelist of accepted values.
 	 * @type {string[]}
@@ -68,6 +70,10 @@
 	let inputValid = true;
 	let chipValues: Array<{ val: (typeof value)[0]; id: number }> =
 		value?.map((val) => {
+			return { val: val, id: Math.random() };
+		}) || [];
+	let permaChipValues: Array<{ val: (typeof value)[0]; id: number }> =
+		permaValue?.map((val) => {
 			return { val: val, id: Math.random() };
 		}) || [];
 
@@ -138,6 +144,16 @@
 		input = '';
 	}
 
+	function togglePermaChip(event: Event, chipIndex: number, chipValue: string): void {
+		if ($$restProps.disabled) return;
+
+		if (permaValue.includes(chipValue)) {
+			permaValue = permaValue.filter((val) => val !== chipValue);
+		} else {
+			permaValue = [...permaValue, chipValue];
+		}
+	}
+
 	function removeChip(event: Event, chipIndex: number, chipValue: string): void {
 		if ($$restProps.disabled) return;
 		// Remove value from array
@@ -189,11 +205,30 @@
 			/>
 		</form>
 		<!-- Chip List -->
-		{#if chipValues.length}
+		{#if chipValues.length || permaChipValues.length}
 			<div
 				class="input-chip-list {classesChipList}"
 				transition:fly|local={{ duration, opacity: 0, y: -20 }}
 			>
+				{#each permaChipValues as { id, val }, i (id)}
+					<!-- Wrapping div required for FLIP animation -->
+					<div animate:flip={{ duration }}>
+						<button
+							type="button"
+							class="chip {chips}"
+							on:click={(e) => {
+								togglePermaChip(e, i, val);
+							}}
+							on:click
+							on:keypress
+							on:keydown
+							on:keyup
+							transition:scale|local={{ duration, opacity: 0 }}
+						>
+							<span>{val}</span>
+						</button>
+					</div>
+				{/each}
 				{#each chipValues as { id, val }, i (id)}
 					<!-- Wrapping div required for FLIP animation -->
 					<div animate:flip={{ duration }}>
