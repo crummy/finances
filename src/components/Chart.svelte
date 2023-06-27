@@ -18,17 +18,24 @@
 	let weekIncome: { [week: string]: number } = {};
 	let dayIncome: { [day: string]: number } = {};
 	$: {
+		console.log(
+			transactions
+				.filter((t) => t.date.startsWith('2023-06'))
+				.map((t) => t.amountCents / 100)
+				.filter((amount) => amount > 0)
+				.reduce((a, b) => a + b, 0)
+		);
+
 		let date = new Date(earliest);
 		while (date.valueOf() <= latest) {
-			const month = startOfMonth(date).toLocaleDateString();
+			const { month, week, day } = dateLabels(date);
+
 			months.push(month);
 			monthExpenses[month] = 0;
 			monthIncome[month] = 0;
-			const week = startOfWeek(date).toLocaleDateString();
 			weeks.push(week);
 			weekExpenses[week] = 0;
 			weekIncome[week] = 0;
-			const day = startOfDay(date).toLocaleDateString();
 			days.push(day);
 			dayExpenses[day] = 0;
 			dayIncome[day] = 0;
@@ -41,9 +48,7 @@
 
 		for (let transaction of transactions) {
 			const date = new Date(transaction.date);
-			const month = startOfMonth(date).toLocaleDateString();
-			const week = startOfWeek(date).toLocaleDateString();
-			const day = startOfDay(date).toLocaleDateString();
+			const { month, week, day } = dateLabels(date);
 			if (transaction.amountCents < 0) {
 				monthExpenses[month] = monthExpenses[month] - transaction.amountCents;
 				weekExpenses[week] = weekExpenses[week] - transaction.amountCents;
@@ -54,6 +59,12 @@
 				dayIncome[day] = dayIncome[day] + transaction.amountCents;
 			}
 		}
+		console.log(
+			Object.entries(monthExpenses)
+				.sort((a, b) => a[0].localeCompare(b[0]))
+				.map((a) => a[0])
+				.filter(distinct)
+		);
 		monthExpenses = monthExpenses;
 		monthIncome = monthIncome;
 		weekExpenses = weekExpenses;
@@ -63,7 +74,9 @@
 	}
 	let labels: string[];
 	let datasets: Array<{ values: number[]; name: string; color: string }>;
-	$: labels = group === 'month' ? months : group === 'week' ? weeks : days;
+	$: labels = (group === 'month' ? months : group === 'week' ? weeks : days).map((d) =>
+		new Date(d).toLocaleString()
+	);
 	$: selectedExpenses =
 		group === 'month' ? monthExpenses : group === 'week' ? weekExpenses : dayExpenses;
 	$: selectedIncome = group === 'month' ? monthIncome : group === 'week' ? weekIncome : dayIncome;
@@ -89,6 +102,17 @@
 			datasets.push({ values: labels.map(() => 0), name: 'No transactions', color: '#9e9e9e' });
 		}
 		console.log(datasets);
+	}
+
+	function dateLabels(date: Date) {
+		const month = startOfMonth(date).valueOf();
+		const week = startOfWeek(date).valueOf();
+		const day = startOfDay(date).valueOf();
+		return {
+			month,
+			week,
+			day
+		};
 	}
 </script>
 
