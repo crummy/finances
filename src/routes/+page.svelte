@@ -4,9 +4,9 @@
 	import Chart from '@components/Chart.svelte';
 	import TransactionsList from '@components/TransactionsList.svelte';
 	import Filter from '@components/Filter.svelte';
-	import Arrow from '@components/Arrow.svelte';
 	import { fly } from 'svelte/transition';
 	import type { TransactionAndAccount } from './+page.server';
+	import ExpandTransactions from '@components/ExpandTransactions.svelte';
 
 	export let data: PageData;
 
@@ -33,12 +33,10 @@
 
 	<Chart transactions={filteredTransactions} />
 
-	<button
-		class="p-4 w-full flex justify-center relative top-0 hover:top-1"
-		on:click={() => (showTransactions = !showTransactions)}
-	>
-		<Arrow orientation={showTransactions ? 'up' : 'down'} />
-	</button>
+	<ExpandTransactions
+		bind:expanded={showTransactions}
+		transactionCount={filteredTransactions.length}
+	/>
 </main>
 <div class="max-w-3xl m-auto grid justify-center">
 	{#if showTransactions}
