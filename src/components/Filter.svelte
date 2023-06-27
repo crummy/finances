@@ -72,16 +72,12 @@
 						filters[input]?.(t) ?? descriptionFilter(input)(t)
 				)
 				.every((f) => f(t));
-		const matchesPermaFilters =
-			permaFilterInputs.length == 0 ||
-			permaFilterInputs
-				.map((input) => (t: TransactionAndAccount) => accountOptions[input]?.(t))
-				.some((f) => f(t));
-		return matchesFilters && matchesPermaFilters;
+		const matchesAccountFilters = accountFilterInputs.includes('account:' + t.accountName);
+		return matchesFilters && matchesAccountFilters;
 	});
 
 	let filterInputs: string[] = [];
-	let permaFilterInputs: string[] = [];
+	let accountFilterInputs: string[] = Object.keys(accountOptions);
 </script>
 
 <InlineAutocomplete
@@ -89,5 +85,5 @@
 	options={autocompleteOptions}
 	permaOptions={Object.keys(accountOptions)}
 	bind:selected={filterInputs}
-	bind:permaSelected={permaFilterInputs}
+	bind:permaSelected={accountFilterInputs}
 />

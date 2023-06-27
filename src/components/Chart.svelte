@@ -18,14 +18,6 @@
 	let weekIncome: { [week: string]: number } = {};
 	let dayIncome: { [day: string]: number } = {};
 	$: {
-		console.log(
-			transactions
-				.filter((t) => t.date.startsWith('2023-06'))
-				.map((t) => t.amountCents / 100)
-				.filter((amount) => amount > 0)
-				.reduce((a, b) => a + b, 0)
-		);
-
 		let date = new Date(earliest);
 		while (date.valueOf() <= latest) {
 			const { month, week, day } = dateLabels(date);
@@ -59,12 +51,6 @@
 				dayIncome[day] = dayIncome[day] + transaction.amountCents;
 			}
 		}
-		console.log(
-			Object.entries(monthExpenses)
-				.sort((a, b) => a[0].localeCompare(b[0]))
-				.map((a) => a[0])
-				.filter(distinct)
-		);
 		monthExpenses = monthExpenses;
 		monthIncome = monthIncome;
 		weekExpenses = weekExpenses;
@@ -85,23 +71,12 @@
 		const expenses = Object.entries(selectedExpenses)
 			.sort((a, b) => a[0].localeCompare(b[0]))
 			.map(([, amount]) => amount / 100);
-		const totalExpenses = expenses.reduce((a, b) => a + b, 0);
-		if (totalExpenses != 0) {
-			datasets.push({ values: expenses, name: 'Expenses', color: '#f44336' });
-		}
+		datasets.push({ values: expenses, name: 'Expenses', color: '#f44336' });
 
 		const income = Object.entries(selectedIncome)
 			.sort((a, b) => a[0].localeCompare(b[0]))
 			.map(([, amount]) => amount / 100);
-		const totalIncome = income.reduce((a, b) => a + b, 0);
-		if (totalIncome != 0) {
-			datasets.push({ values: income, name: 'Income', color: '#4caf50' });
-		}
-
-		if (totalExpenses == 0 && totalIncome == 0) {
-			datasets.push({ values: labels.map(() => 0), name: 'No transactions', color: '#9e9e9e' });
-		}
-		console.log(datasets);
+		datasets.push({ values: income, name: 'Income', color: '#4caf50' });
 	}
 
 	function dateLabels(date: Date) {

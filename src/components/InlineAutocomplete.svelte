@@ -43,7 +43,8 @@
 		on:keydown={listenForEnter}
 		bind:input
 		bind:value={selected}
-		bind:permaValue={permaOptions}
+		{permaOptions}
+		bind:permaValue={permaSelected}
 		name="chips"
 		placeholder="category:supermarkets, type:eftpos, expenses..."
 	/>

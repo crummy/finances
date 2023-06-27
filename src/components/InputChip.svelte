@@ -24,6 +24,7 @@
 	export let value: string[] = [];
 
 	export let permaValue: string[] = [];
+	export let permaOptions: string[] = [...permaValue];
 	/**
 	 * Provide a whitelist of accepted values.
 	 * @type {string[]}
@@ -73,7 +74,7 @@
 			return { val: val, id: Math.random() };
 		}) || [];
 	let permaChipValues: Array<{ val: (typeof value)[0]; id: number }> =
-		permaValue?.map((val) => {
+		permaOptions?.map((val) => {
 			return { val: val, id: Math.random() };
 		}) || [];
 
@@ -215,7 +216,7 @@
 					<div animate:flip={{ duration }}>
 						<button
 							type="button"
-							class="chip {chips}"
+							class={`chip ${chips} ${permaValue.includes(val) ? '' : 'opacity-50'}`}
 							on:click={(e) => {
 								togglePermaChip(e, i, val);
 							}}

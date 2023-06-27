@@ -7,6 +7,7 @@
 	import { fly } from 'svelte/transition';
 	import type { TransactionAndAccount } from './+page.server';
 	import ExpandTransactions from '@components/ExpandTransactions.svelte';
+	import ClientSide from '@components/ClientSide.svelte';
 
 	export let data: PageData;
 

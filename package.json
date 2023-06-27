@@ -35,9 +35,11 @@
 	"type": "module",
 	"dependencies": {
 		"akahu": "^1.12.0",
+		"apexcharts": "^3.41.0",
 		"better-sqlite3": "^8.4.0",
 		"date-fns": "^2.30.0",
 		"kysely": "^0.25.0",
+		"svelte-apexcharts": "^1.0.2",
 		"svelte-frappe-charts": "^1.10.0"
 	}
 }
