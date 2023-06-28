@@ -59,7 +59,7 @@
 	/** Provide classes to set padding styles. */
 	export let padding: CssClasses = 'p-2';
 	/** Provide classes to set border radius styles. */
-	export let rounded: CssClasses = 'rounded-container-token';
+	export let rounded: CssClasses = 'border-radius-sm';
 
 	// Classes
 	const cBase = 'textarea cursor-pointer';

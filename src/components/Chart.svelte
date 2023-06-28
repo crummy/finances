@@ -91,7 +91,7 @@
 	}
 </script>
 
-<div class:hidden={transactions.length === 0}>
+<div class:hidden={transactions.length === 0} class="pb-4">
 	<Chart data={{ labels, datasets }} />
 	<div class="btn-group variant-filled flex w-fit m-auto">
 		<button on:click={() => (group = 'month')}>Months</button>
