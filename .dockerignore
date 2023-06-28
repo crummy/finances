@@ -1,0 +1,9 @@
+fly.toml
+Dockerfile
+.dockerignore
+node_modules
+.git
+.svelte-kit
+.eslint*
+.prettier*
+.npmrc
