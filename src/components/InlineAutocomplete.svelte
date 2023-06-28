@@ -5,23 +5,25 @@
 	export let permaOptions: string[];
 	export let selected: string[];
 	export let permaSelected: string[];
-	const allOptions = [...permaOptions, ...options];
+
+	let timer;
+
+	const debounce = (input: string) => {
+		clearTimeout(timer);
+		timer = setTimeout(() => {
+			if (input.length <= 1) {
+				autocomplete = '';
+				return;
+			}
+			autocomplete = options.find((f) => f.toLowerCase().startsWith(input.toLowerCase())) || '';
+		}, 200);
+	};
 
 	let input = '';
 
+	$: debounce(input);
+
 	let autocomplete: string;
-	$: {
-		if (input.trim().length == 0) {
-			autocomplete = '';
-		} else {
-			const match = allOptions.find((f) => f.toLowerCase().startsWith(input.toLowerCase()));
-			if (match) {
-				autocomplete = input + match.substring(input.length);
-			} else {
-				autocomplete = '';
-			}
-		}
-	}
 
 	function listenForEnter(e: KeyboardEvent) {
 		if (e.key === 'Enter' && autocomplete != '') {
@@ -36,9 +38,6 @@
 </script>
 
 <div class={`flex flex-wrap relative ${$$restProps.class}`}>
-	<div class="p-2 absolute pointer-events-none bg-transparent z-10 text-secondary-400-500-token">
-		{autocomplete}
-	</div>
 	<InputChip
 		on:keydown={listenForEnter}
 		bind:input
@@ -47,5 +46,11 @@
 		bind:permaValue={permaSelected}
 		name="chips"
 		placeholder="category:supermarkets, type:eftpos, expenses..."
-	/>
+	>
+		<div
+			class="p-2 absolute pointer-events-none bg-transparent z-10 text-secondary-400-500-token top-0 left-0"
+		>
+			{autocomplete}
+		</div>
+	</InputChip>
 </div>

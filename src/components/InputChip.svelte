@@ -204,6 +204,7 @@
 				on:blur
 				disabled={$$restProps.disabled}
 			/>
+			<slot />
 		</form>
 		<!-- Chip List -->
 		{#if chipValues.length || permaChipValues.length}
