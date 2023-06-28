@@ -14,6 +14,8 @@ because I wanted to dig a little deeper into Svelte.
 [Skeleton](https://www.skeleton.dev/) UI toolkit
 * Database is a simple [SQLite](https://www.sqlite.org/index.html) database
 because how can you not love SQLite?
+* [Kysely](https://kysely.dev/) because I didn't want an ORM but I wanted
+typesafety in my SQL queries
 
 ## Usage
 
