@@ -63,7 +63,6 @@
 
 	export let filteredTransactions: TransactionAndAccount[];
 	$: filteredTransactions = transactions.filter((t) => {
-		if (filterInputs.length == 0) return true;
 		const matchesFilters =
 			filterInputs.length == 0 ||
 			filterInputs
@@ -73,6 +72,7 @@
 				)
 				.every((f) => f(t));
 		const matchesAccountFilters = accountFilterInputs.includes('account:' + t.accountName);
+		if (filterInputs.length == 0) return matchesAccountFilters;
 		return matchesFilters && matchesAccountFilters;
 	});
 
