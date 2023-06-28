@@ -1,38 +1,31 @@
-# create-svelte
+# Finances App
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
+This simple little service shows a summary of your finances over the last
+couple years.
 
-## Creating a project
+## Technology
 
-If you're seeing this, you've probably already done this step. Congrats!
+* Data comes from [Akahu](https://www.akahu.nz/), which provides an API to
+access all the banks in NZ. It's set up for just a personal account, so the
+app is not multi-tenanted.
+* [SvelteKit](https://kit.svelte.dev/) is the framework behind the app,
+because I wanted to dig a little deeper into Svelte.
+* [Tailwind](https://tailwindcss.com/) for styling, with the
+[Skeleton](https://www.skeleton.dev/) UI toolkit
+* Database is a simple [SQLite](https://www.sqlite.org/index.html) database
+because how can you not love SQLite?
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
+## Usage
 
-# create a new project in my-app
-npm create svelte@latest my-app
+0. Set up an Akahu account and get your API key, put in `.env` like so:
 ```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+VITE_AKAHU_APP_TOKEN=app_token_...
+VITE_AKAHU_USER_TOKEN=user_token_...
 ```
+1. `npm install`
+2. `npm run dev`
+3. Visit http://localhost:5173
 
-## Building
+## Example
 
-To create a production version of your app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+![Screenshot](finances.png)
