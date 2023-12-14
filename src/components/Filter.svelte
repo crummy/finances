@@ -40,9 +40,7 @@
 	const accountFilter = (account: string) => (t: TransactionAndAccount) => {
 		return t.accountName.toLowerCase() == account.toLowerCase();
 	};
-	const accountOptions = Object.fromEntries(
-		accounts.map((a) => [`account:${a}`, accountFilter(a)])
-	);
+	const accountOptions = Object.fromEntries(accounts.map((a) => [a, accountFilter(a)]));
 
 	const autocompleteOptions: AutocompleteOption<string>[] = [
 		...Object.keys(categoryOptions),
@@ -70,9 +68,7 @@
 						filters[input]?.(t) ?? descriptionFilter(input)(t)
 				)
 				.every((f) => f(t));
-		const matchesAccountFilters = accountFilterInputs.includes(
-			'account:' + t.accountName.toLowerCase()
-		);
+		const matchesAccountFilters = accountFilterInputs.includes(t.accountName.toLowerCase());
 		if (filterInputs.length == 0) return matchesAccountFilters;
 		return matchesFilters && matchesAccountFilters;
 	});
@@ -81,33 +77,61 @@
 	let filterInputs: string[] = [];
 	let accountFilterInputs: string[] = Object.keys(accountOptions).map((i) => i.toLowerCase());
 
-	function onSelection(e: CustomEvent<AutocompleteOption<string>>) {
-		filterInputs.push(e.detail.value);
+	function onSelection(e: KeyboardEvent & { currentTarget: EventTarget & HTMLInputElement }) {
+		if (e.key === 'Enter') {
+			select(e.currentTarget.value);
+			input = '';
+		}
 	}
 
-	const popupSettings: PopupSettings = {
-		event: 'focus-click',
-		target: 'popupAutocomplete',
-		placement: 'bottom'
-	};
+	function select(value: string) {
+		filterInputs = [...filterInputs, value];
+	}
+
+	function deselect(value: string) {
+		filterInputs = filterInputs.filter((f) => f != value);
+	}
+
+	function toggleAccount(account: string) {
+		if (accountFilterInputs.includes(account.toLowerCase())) {
+			accountFilterInputs = accountFilterInputs.filter((f) => f != account.toLowerCase());
+		} else {
+			accountFilterInputs = [...accountFilterInputs, account.toLowerCase()];
+		}
+	}
 </script>
 
 <div class="p-4">
 	<input
-		class="input autocomplete"
-		type="search"
-		name="autocomplete-search"
 		bind:value={input}
+		class="input"
 		placeholder="Search..."
-		use:popup={popupSettings}
+		list="filters"
+		on:keydown={(e) => onSelection(e)}
 	/>
-	<InputChip bind:input bind:value={filterInputs} name="chips" />
-	<div class="card w-full max-h-48 p-4 overflow-y-auto" tabindex="-1">
-		<Autocomplete
-			bind:input
-			options={autocompleteOptions}
-			denylist={filterInputs}
-			on:selection={onSelection}
-		/>
+	<datalist id="filters">
+		{#each autocompleteOptions as option}
+			<option value={option.value} on:click={() => select(option.value)} />
+		{/each}
+	</datalist>
+	<div class="flex gap-1">
+		{#each accounts as account}
+			<button
+				class="chip"
+				class:variant-soft={!accountFilterInputs.includes(account)}
+				class:variant-filled={accountFilterInputs.includes(account)}
+				on:click={() => toggleAccount(account)}
+			>
+				<span>x</span>
+				<span>{account}</span>
+			</button>
+		{/each}
+
+		{#each filterInputs as filter}
+			<button class="chip variant-filled" on:click={() => deselect(filter)}>
+				<span>x</span>
+				<span>{filter}</span>
+			</button>
+		{/each}
 	</div>
 </div>
