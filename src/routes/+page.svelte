@@ -31,7 +31,7 @@
 		</svelte:fragment>
 	</AppBar>
 
-	<Filter transactions={data.transactions} bind:filteredTransactions class="p-4" />
+	<Filter transactions={data.transactions} bind:filteredTransactions />
 
 	<Chart transactions={filteredTransactions} />
 

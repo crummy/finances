@@ -70,11 +70,15 @@ async function loadLatestTransactions() {
 
 async function loadLatestAccounts() {
 	const accounts = await loadAccounts();
+	// for every account,
 	for (const account of accounts) {
-		const exists =
-			(await db.selectFrom('accounts').select('id').where('akahuId', '=', account._id).execute())
-				.length > 0;
-		if (exists) {
+		const existingRecord = await db
+			.selectFrom('accounts')
+			.select('id')
+			.where('akahuId', '=', account._id)
+			.executeTakeFirst();
+		if (existingRecord) {
+			// update the existing record with latest info
 			await db
 				.updateTable('accounts')
 				.set({
@@ -86,6 +90,7 @@ async function loadLatestAccounts() {
 				.where('akahuId', '=', account._id)
 				.execute();
 		} else {
+			// otherwise create a new one
 			await db
 				.insertInto('accounts')
 				.values({
@@ -106,7 +111,6 @@ export const load: PageServerLoad<Params> = async () => {
 	const transactions: TransactionAndAccount[] = await db
 		.selectFrom('transactions')
 		.innerJoin('accounts', 'transactions.akahuAccountId', 'accounts.akahuId')
-		.orderBy('date', 'desc')
 		.select([
 			'transactions.akahuId',
 			'description',
@@ -116,6 +120,7 @@ export const load: PageServerLoad<Params> = async () => {
 			'amountCents',
 			'accounts.name as accountName'
 		])
+		.orderBy((eb) => eb.ref('date'), 'desc')
 		.execute();
 	return {
 		transactions

@@ -1,7 +1,12 @@
 <script lang="ts">
 	import { distinct } from '$lib/util';
-	import InlineAutocomplete from '@components/InlineAutocomplete.svelte';
 	import type { TransactionAndAccount } from '../routes/+page.server';
+	import {
+		Autocomplete,
+		type AutocompleteOption,
+		InputChip,
+		type PopupSettings
+	} from '@skeletonlabs/skeleton';
 
 	export let transactions: TransactionAndAccount[];
 
@@ -12,9 +17,6 @@
 	const categoryFilter = (category: string) => (t: TransactionAndAccount) => {
 		return t.category?.toLowerCase() == category.toLowerCase();
 	};
-	const categoryShortOptions = Object.fromEntries(
-		categories.map((c) => [`c:${c}`, categoryFilter])
-	);
 	const categoryOptions = Object.fromEntries(
 		categories.map((c) => [`category:${c}`, categoryFilter(c)])
 	);
@@ -25,7 +27,6 @@
 	const typeFilter = (type: string) => (t: TransactionAndAccount) => {
 		return t.type?.toLowerCase() == type.toLowerCase();
 	};
-	const typeShortOptions = Object.fromEntries(types.map((t) => [`t:${t}`, typeFilter(t)]));
 	const typeOptions = Object.fromEntries(types.map((t) => [`type:${t}`, typeFilter(t)]));
 
 	const descriptions: string[] = transactions
@@ -43,21 +44,17 @@
 		accounts.map((a) => [`account:${a}`, accountFilter(a)])
 	);
 
-	const autocompleteOptions: string[] = [
-		...Object.keys(categoryShortOptions),
+	const autocompleteOptions: AutocompleteOption<string>[] = [
 		...Object.keys(categoryOptions),
-		...Object.keys(typeShortOptions),
 		...Object.keys(typeOptions),
 		...descriptions,
 		'income',
 		'expenses'
-	];
+	].map((el) => ({ label: el.toLowerCase(), value: el.toLowerCase() }));
 
 	type Filter = (t: TransactionAndAccount) => boolean;
 	const filters: Record<string, Filter> = {
-		...categoryShortOptions,
 		...categoryOptions,
-		...typeShortOptions,
 		...typeOptions,
 		income: (t: TransactionAndAccount) => t.amountCents > 0,
 		expenses: (t: TransactionAndAccount) => t.amountCents < 0
@@ -80,14 +77,37 @@
 		return matchesFilters && matchesAccountFilters;
 	});
 
+	let input: string;
 	let filterInputs: string[] = [];
 	let accountFilterInputs: string[] = Object.keys(accountOptions).map((i) => i.toLowerCase());
+
+	function onSelection(e: CustomEvent<AutocompleteOption<string>>) {
+		filterInputs.push(e.detail.value);
+	}
+
+	const popupSettings: PopupSettings = {
+		event: 'focus-click',
+		target: 'popupAutocomplete',
+		placement: 'bottom'
+	};
 </script>
 
-<InlineAutocomplete
-	class={$$restProps.class}
-	options={autocompleteOptions.map((o) => o.toLowerCase())}
-	permaOptions={Object.keys(accountOptions).map((o) => o.toLowerCase())}
-	bind:selected={filterInputs}
-	bind:permaSelected={accountFilterInputs}
-/>
+<div class="p-4">
+	<input
+		class="input autocomplete"
+		type="search"
+		name="autocomplete-search"
+		bind:value={input}
+		placeholder="Search..."
+		use:popup={popupSettings}
+	/>
+	<InputChip bind:input bind:value={filterInputs} name="chips" />
+	<div class="card w-full max-h-48 p-4 overflow-y-auto" tabindex="-1">
+		<Autocomplete
+			bind:input
+			options={autocompleteOptions}
+			denylist={filterInputs}
+			on:selection={onSelection}
+		/>
+	</div>
+</div>

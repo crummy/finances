@@ -25,7 +25,7 @@ interface AccountTable {
 	akahuId: string;
 	name: string;
 	active: number;
-	accountNumber: string;
+	accountNumber: string | undefined;
 	type: string;
 }
 
