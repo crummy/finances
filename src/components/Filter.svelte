@@ -1,12 +1,7 @@
 <script lang="ts">
 	import { distinct } from '$lib/util';
 	import type { TransactionAndAccount } from '../routes/+page.server';
-	import {
-		Autocomplete,
-		type AutocompleteOption,
-		InputChip,
-		type PopupSettings
-	} from '@skeletonlabs/skeleton';
+	import { type AutocompleteOption } from '@skeletonlabs/skeleton';
 
 	export let transactions: TransactionAndAccount[];
 
@@ -45,17 +40,13 @@
 	const autocompleteOptions: AutocompleteOption<string>[] = [
 		...Object.keys(categoryOptions),
 		...Object.keys(typeOptions),
-		...descriptions,
-		'income',
-		'expenses'
+		...descriptions
 	].map((el) => ({ label: el.toLowerCase(), value: el.toLowerCase() }));
 
 	type Filter = (t: TransactionAndAccount) => boolean;
 	const filters: Record<string, Filter> = {
 		...categoryOptions,
-		...typeOptions,
-		income: (t: TransactionAndAccount) => t.amountCents > 0,
-		expenses: (t: TransactionAndAccount) => t.amountCents < 0
+		...typeOptions
 	};
 
 	export let filteredTransactions: TransactionAndAccount[];
@@ -69,10 +60,12 @@
 				)
 				.every((f) => f(t));
 		const matchesAccountFilters = accountFilterInputs.includes(t.accountName.toLowerCase());
-		if (filterInputs.length == 0) return matchesAccountFilters;
-		return matchesFilters && matchesAccountFilters;
+		const matchesType = (showIncome && t.amountCents > 0) || (showExpenses && t.amountCents < 0);
+		return matchesFilters && matchesAccountFilters && matchesType;
 	});
 
+	let showIncome: boolean = true;
+	let showExpenses: boolean = true;
 	let input: string;
 	let filterInputs: string[] = [];
 	let accountFilterInputs: string[] = Object.keys(accountOptions).map((i) => i.toLowerCase());
@@ -104,7 +97,7 @@
 <div class="p-4">
 	<input
 		bind:value={input}
-		class="input"
+		class="input p-2"
 		placeholder="Search..."
 		list="filters"
 		on:keydown={(e) => onSelection(e)}
@@ -114,7 +107,7 @@
 			<option value={option.value} on:click={() => select(option.value)} />
 		{/each}
 	</datalist>
-	<div class="flex gap-1">
+	<div class="flex gap-1 p-2">
 		{#each accounts as account}
 			<button
 				class="chip"
@@ -126,6 +119,24 @@
 				<span>{account}</span>
 			</button>
 		{/each}
+		<button
+			class="chip"
+			class:variant-soft={!showIncome}
+			class:variant-filled={showIncome}
+			on:click={() => (showIncome = !showIncome)}
+		>
+			<span>x</span>
+			<span>income</span>
+		</button>
+		<button
+			class="chip"
+			class:variant-soft={!showExpenses}
+			class:variant-filled={showExpenses}
+			on:click={() => (showExpenses = !showExpenses)}
+		>
+			<span>x</span>
+			<span>expenses</span>
+		</button>
 
 		{#each filterInputs as filter}
 			<button class="chip variant-filled" on:click={() => deselect(filter)}>
