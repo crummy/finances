@@ -64,7 +64,7 @@
 		return matchesFilters && matchesAccountFilters && matchesType;
 	});
 
-	let showIncome: boolean = true;
+	let showIncome: boolean = false;
 	let showExpenses: boolean = true;
 	let input: string;
 	let filterInputs: string[] = [];
